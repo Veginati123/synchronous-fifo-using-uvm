@@ -1,0 +1,63 @@
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+`include "sequence_item.sv"
+`include "sequencer.sv"
+`include "sequence.sv"
+`include "driver.sv"
+`include "monitor.sv"
+`include "coverage.sv"
+`include "interface.sv"
+`include "agent.sv"
+`include "scoreboard.sv"
+`include "env.sv"
+`include "test.sv"
+`include "wr_test.sv"
+`include "wr_rd_test.sv"
+`include "wr_then_rd_test.sv"
+`include "wr_rd_parll_test.sv"
+//`include "run.do"
+module testbench_top;
+  bit clk;
+  bit rst;
+  //clock generation
+  initial
+    begin
+      clk=0;
+      forever #5 clk= ~clk;
+    end
+  //reset generation
+  initial
+    begin
+      rst =1;
+      #5 rst =0;
+    end
+  // interface instance 
+  fifo_interface in(clk,rst);
+  //DUT instance
+  fifo_sync dut(.data_in(in.data_in),.clk(in.clk),.rst(in.rst),.wr(in.wr),.rd(in.rd),.empty(in.empty),.full(in.full),.data_out(in.data_out));
+  //config db
+  initial
+    begin
+      //set interface into config db  , virtual interface to get access in dynamic class
+      uvm_config_db#(virtual fifo_interface)::set(null,"*","vif",in);
+      
+    end
+  //triggering testcase
+  initial
+    begin
+      //run_test("fifo_test");//1.random stimulus
+      run_test("fifo_wr_test");//2, write only
+      //run_test("fifo_wr_rd_test");//3. back to  back write and read
+     // run_test("fifo_wr_then_rd_test");//4.write complete then read
+     // run_test("fifo_wr_rd_parll_test");//5.write read parallel
+      
+    end
+  
+initial
+  begin
+    $dumpfile("dump.vcd");
+    $dumpvars(0, testbench_top); 
+  end
+endmodule
+
+
