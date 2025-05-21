@@ -1,0 +1,46 @@
+module fifo_sync
+  //parameters section
+  #(parameter FIFO_DEPTH = 8,
+   parameter DATA_WIDTH= 8)
+  //port section
+  (input clk,
+  input rst,
+  //input cs
+  input wr,
+  input rd,
+   input [DATA_WIDTH-1:0] data_in,
+   output reg [DATA_WIDTH-1:0] data_out,
+  output empty,
+   output full);
+  localparam FIFO_DEPTH_LOG = $clog2(FIFO_DEPTH);//FIFO_DEPTH_LOG =3 (NO of bits required to represent 8(000 to 111))
+  // declare a bidimesional array to store the data
+  reg [DATA_WIDTH-1:0] fifo[0:FIFO_DEPTH-1];
+  //DEPTH 8 => [0:7] 32 bit elements
+  //wr/rd pointer have 1 extra bits at MSB
+  reg [FIFO_DEPTH_LOG:0] write_pointer;//3:0
+  reg [FIFO_DEPTH_LOG:0] read_pointer;//3:0
+  //write
+  always@(posedge clk or negedge rst)
+    begin
+      if(!rst)//rst=0 system reset happens
+        write_pointer <=0;
+      else if(wr && !full)
+        begin
+          fifo[write_pointer[FIFO_DEPTH_LOG-1:0]] <= data_in;
+        write_pointer <= write_pointer + 1'b1;
+        end
+    end
+  always@(posedge clk or negedge rst)
+    begin
+      if(!rst)
+        read_pointer <=0;
+      else if (rd && !empty) begin
+        data_out <= fifo[read_pointer[FIFO_DEPTH_LOG-1:0]];
+        
+        read_pointer <= read_pointer+ 1'b1;
+      end
+    end
+  //declare full and empty logic
+  assign empty = (read_pointer == write_pointer);
+  assign full = (read_pointer == {~write_pointer[FIFO_DEPTH_LOG],write_pointer[FIFO_DEPTH_LOG-1:0]});
+endmodule
