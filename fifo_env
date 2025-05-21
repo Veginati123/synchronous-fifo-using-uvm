@@ -1,0 +1,38 @@
+//FIFO environment
+class fifo_environment extends uvm_env;
+  `uvm_component_utils(fifo_environment)//factory registration
+  
+  //create handles for agent and scoreboard
+  fifo_agent agt;
+  fifo_scoreboard scb;
+  fifo_coverage_collector cov;
+  
+  //constrctor
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  
+  //build phase
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    agt=fifo_agent::type_id::create("agt",this);
+    scb=fifo_scoreboard::type_id::create("scb",this);
+    cov=fifo_coverage_collector::type_id::create("cov",this);
+    
+  endfunction
+  
+  //connect phase
+  function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
+    agt.mon.ap.connect(scb.scb_port);
+    uvm_report_info("FIFO_ENVIRONMENT", "connect_phase, connected monitor to scoreboard");
+    monitor.ap.connect(cov.analysis_export);
+    uvm_report_info("FIFO_ENVIRONMENT", "connect_phase, connected monitor to coverage collector");
+  endfunction
+  
+  /*function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
+    agt.monitor.ap.connect(cov.analysis_export);
+    uvm_report_info("FIFO_ENVIRONMENT", "connect_phase, connected monitor to coverage collector");
+  endfunction*/
+endclass
