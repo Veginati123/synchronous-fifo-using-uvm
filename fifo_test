@@ -1,0 +1,34 @@
+class fifo_test extends uvm_test;
+  `uvm_component_utils(fifo_test)//factory registration
+  //create handle for env
+  fifo_environment env;
+  //create handle for sequenece
+  
+  fifo_sequence fifo_seq;//random sequnce
+  //constructor
+  function new(string name, uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  
+  //build phase
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    //create the envrionment
+    //create method in test internally calls constrctor in env
+    env=fifo_environment::type_id::create("env",this);
+  endfunction
+  //end of elbration phase to print topology
+  virtual function void end_of_elaboration();
+    //print topology
+    print();
+  endfunction
+  //run phase
+  task run_phase(uvm_phase phase);
+    fifo_seq = fifo_sequence::type_id::create("fifo_seq");
+    phase.raise_objection(this);
+    fifo_seq.start(env.agt.seq);
+    phase.drop_objection(this);
+  endtask
+endclass
+  
+  
