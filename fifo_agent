@@ -1,0 +1,28 @@
+class fifo_agent extends uvm_agent;
+  //factory registration
+  `uvm_component_utils(fifo_agent);
+  //handles for driver,seqencer
+  
+  fifo_driver drv;
+  fifo_sequencer seq;
+  fifo_monitor mon;
+  
+  //constructor
+  function new(string name,uvm_component parent);
+    super.new(name,parent);
+  endfunction
+  
+  //buildphase
+ virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
+    drv=fifo_driver::type_id::create("drv",this);
+    seq=fifo_sequencer::type_id::create("seq",this);
+   mon=fifo_monitor::type_id::create("mon",this);
+ endfunction
+    //connect phase
+   virtual function void connect_phase(uvm_phase phase);
+     super.connect_phase(phase);
+     drv.seq_item_port.connect(seq.seq_item_export);
+    
+  endfunction
+endclass
